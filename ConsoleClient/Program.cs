@@ -8,7 +8,7 @@ namespace ConsoleClient
     class Program
     {
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.WriteLine("Async Exercise - type 'q' to quit");
 
@@ -19,12 +19,13 @@ namespace ConsoleClient
             while (input != 'q')
             {
                 DateTime start = DateTime.Now;
-
-                Task<HttpResponseMessage> response = _client.GetAsync("https://localhost:5003/numbers/12");
-
-                String result = (response.Result.Content.ReadAsStringAsync().Result);
-
-                WriteToFile("Result: " + result + " between " + start.ToLongTimeString() + " - " + DateTime.Now.ToLongTimeString());
+                await Task.Factory.StartNew(async () =>
+                {
+                    Task<HttpResponseMessage> gettingAsyncResponse = _client.GetAsync("https://localhost:5003/numbers/12");
+                    var asyncResponse = await gettingAsyncResponse;
+                    string result = asyncResponse.Content.ReadAsStringAsync().Result;
+                    WriteToFile("Result: " + result + " between " + start.ToLongTimeString() + " - " + DateTime.Now.ToLongTimeString());
+                });
 
                 Console.Write(">");
                 input = Console.ReadKey().KeyChar;
@@ -33,13 +34,13 @@ namespace ConsoleClient
 
         private static void WriteToFile(string s)
         {
-            string path = @"fromclient.txt";
+                string path = @"fromclient.txt";
 
-            StreamWriter sw = File.AppendText(path);
+                StreamWriter sw = File.AppendText(path);
 
-            sw.WriteLine(s);
+                sw.WriteLine(s);
 
-            sw.Flush();
+                sw.Flush();
         }
     }
 }
