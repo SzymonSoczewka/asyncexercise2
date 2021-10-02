@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -22,10 +22,10 @@ namespace ServerAPI.Controllers
 
         [HttpGet]
         [Route("{count}")]
-        public async Task<IEnumerable<int>> GetNumbers(int count)
+        public IEnumerable<int> GetNumbers(int count)
         {
             IEnumerable<int> result = GetEvenNumbersByAmount(count);
-            await Task.Delay(2000);
+            Thread.Sleep(2000);
             return result;
         }
 

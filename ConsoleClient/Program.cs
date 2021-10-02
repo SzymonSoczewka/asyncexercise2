@@ -8,7 +8,7 @@ namespace ConsoleClient
     class Program
     {
 
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             Console.WriteLine("Async Exercise - type 'q' to quit");
 
@@ -19,21 +19,23 @@ namespace ConsoleClient
             while (input != 'q')
             {
                 DateTime start = DateTime.Now;
-                await Task.Factory.StartNew(async () =>
+                var gettingAsyncResponse = _client.GetAsync("https://localhost:5003/numbers/12");
+
+                gettingAsyncResponse.ContinueWith((t) =>
                 {
-                    Task<HttpResponseMessage> gettingAsyncResponse = _client.GetAsync("https://localhost:5003/numbers/12");
-                    var asyncResponse = await gettingAsyncResponse;
-                    string result = asyncResponse.Content.ReadAsStringAsync().Result;
-                    WriteToFile("Result: " + result + " between " + start.ToLongTimeString() + " - " + DateTime.Now.ToLongTimeString());
+                    string responseString = t.Result.Content.ReadAsStringAsync().Result;
+                    WriteToFile("Result: " + responseString + " between " + start.ToLongTimeString() + " - " + DateTime.Now.ToLongTimeString());
                 });
 
                 Console.Write(">");
                 input = Console.ReadKey().KeyChar;
             }
         }
-
+        static Object myLock = new Object();
         private static void WriteToFile(string s)
         {
+            lock (myLock)
+            {
                 string path = @"fromclient.txt";
 
                 StreamWriter sw = File.AppendText(path);
@@ -41,6 +43,7 @@ namespace ConsoleClient
                 sw.WriteLine(s);
 
                 sw.Flush();
+            }
         }
     }
 }
